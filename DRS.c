@@ -9,7 +9,7 @@
 #define MAX_STRING 6000
 #define MIN_STRING 200
 
-int read_act(int i, char buff[MAX_STRING], unsigned short byte)
+int read_file(int i, char buff[MAX_STRING], unsigned short byte)
 {// function to read act file
     int a=0,b=0,output=0;
     char buffer[MIN_STRING];
@@ -18,12 +18,11 @@ int read_act(int i, char buff[MAX_STRING], unsigned short byte)
     fseek(act_file, i, SEEK_SET );
     fread(&a, 1, 1, act_file);
 
-    if(byte==2)
-    {
+    if(byte==2){
     fseek(act_file, i+1, SEEK_SET );
     fread(&b, 1, 1, act_file);
     }
-    // printf("%.2x\n", a);
+
     fclose(act_file);
     
     if(byte==2){
@@ -69,7 +68,8 @@ while ((file = readdir(dir)) != NULL)
         // strcpy(string,argv[1]);
         char buffer[MIN_STRING],text[MAX_STRING];
         int i=0,j=0,k=0,a=0,b=0,diff=0;
-        unsigned short hit=0,byte=strcmp(argv[1],"1")?1:2;
+        unsigned short hit=0, byte = atoi(argv[2]);
+        if(!( byte==1 || byte==2 )){ shutdown(); }// just in case non valid byte
 
         FILE *input_file;
         input_file = fopen(buff,"rb"); // open input act file
@@ -77,6 +77,7 @@ while ((file = readdir(dir)) != NULL)
         int eof=0;
         eof = ftell(input_file);
         fclose(input_file);
+        printf("\rWorking. . . ");
 
         for(i=0;i<eof;i++) // read only i+argsx2 so you don't go over eof
         {
@@ -88,8 +89,8 @@ while ((file = readdir(dir)) != NULL)
                 hit=0; break;
                 }
                 hit=1;
-                a = read_act(j,buff,byte);
-                b = read_act(j+byte,buff,byte);
+                a = read_file(j,buff,byte);
+                b = read_file((j+byte),buff,byte);
                 // check condition to identify which is largest number
                 diff = a>b?a-b:b-a;
 
@@ -100,6 +101,8 @@ while ((file = readdir(dir)) != NULL)
                 hit=0;
                 break;
             }
+
+
             if(hit)
             {
                 printf("file: %s offset: %d\n",file->d_name,i);
@@ -107,7 +110,7 @@ while ((file = readdir(dir)) != NULL)
                 log_file=fopen("log.txt", "a");
                 fprintf(log_file, "file: %s offset: %d\n",file->d_name,i);
                 fclose(log_file);
-            }
+            } 
         }
 
 
@@ -116,7 +119,7 @@ while ((file = readdir(dir)) != NULL)
     }
     closedir(dir);
 
-printf("Finsihed search.\nDRS tool made by msmalik681.");
+printf("Finsihed search.\nDRS tool made by msmalik681.\n");
 
 }
 
